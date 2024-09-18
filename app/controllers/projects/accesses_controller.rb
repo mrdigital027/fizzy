@@ -6,14 +6,12 @@ class Projects::AccessesController < ApplicationController
   end
 
   def update
-    update_access
-    redirect_to project_access_url(@project)
+    @project.update_access [ Current.user, *find_users ]
+    redirect_to edit_project_access_url(@project)
   end
 
   private
-    def update_access
-      users = Current.account.users.active.find([ Current.user.id, *params[:user_ids] ])
-      users.each { |user| @project.accesses.create_or_find_by!(user: user) }
-      @project.accesses.where.not(user: users).destroy_all
+    def find_users
+      Current.account.users.active.where(id: params[:user_ids])
     end
 end
